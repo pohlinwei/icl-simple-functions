@@ -115,6 +115,8 @@ class TransformerModel(nn.Module):
 
     def forward(self, xs, ys, inds=None):
         if inds is None:
+            # NOTE: `ys.shape[1]` should return the sequence length -> `inds` corresponds
+            # to the entire sequence's indices.
             inds = torch.arange(ys.shape[1])
         else:
             inds = torch.tensor(inds)
@@ -124,6 +126,7 @@ class TransformerModel(nn.Module):
         embeds = self._read_in(zs)
         output = self._backbone(inputs_embeds=embeds).last_hidden_state
         prediction = self._read_out(output)
+        # NOTE: uses `::2` since we only want to get the predictions (i.e. `\hat{y}`s).
         return prediction[:, ::2, 0][:, inds]  # predict only on xs
 
 
